@@ -1,9 +1,10 @@
 import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
-    constructor() {}
+    constructor(private readonly jwtService: JwtService ) {}
 
     @Get()
     @UseGuards(AuthGuard('github'))
@@ -14,7 +15,9 @@ export class AuthController {
     @Get('callback')
     @UseGuards(AuthGuard('github'))
     async authCallback(@Req() req) {
-    return req.user;
+    const user = req.user;
+    const payload = { username: user.username, sub: user.userId };
+    return { accessToken: this.jwtService.sign(payload)}
     }
 
 }
